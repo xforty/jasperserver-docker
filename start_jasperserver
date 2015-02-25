@@ -1,0 +1,20 @@
+#!/bin/sh 
+
+JASPER_VERSION=5.6.1
+BUILDOMATIC=/data/buildomatic
+
+cd $BUILDOMATIC
+
+[ -z "$MYSQL_HOST" ] && echo "MYSQL_HOST REQUIRED" && exit 1
+[ -z "$MYSQL_USERNAME" ] && MYSQL_USERNAME="root"
+[ -z "$MYSQL_PASSWORD" ] && echo "MYSQL_PASSWORD REQUIRED" && exit 1
+[ -z "$MYSQL_PORT" ] && MYSQL_PORT=3306
+
+sed -i "s/MYSQL_HOST/$MYSQL_HOST/" $PROPERTIES
+sed -i "s/MYSQL_USERNAME/$MYSQL_USERNAME/" $PROPERTIES
+sed -i "s/MYSQL_PASSWORD/$MYSQL_PASSWORD/" $PROPERTIES
+sed -i "s/MYSQL_PORT/$MYSQL_PORT/" $PROPERTIES
+
+./js-ant set-minimal-mode gen-config deploy-jdbc-jar
+chown -R tomcat7:tomcat7 /var/lib/tomcat7 /usr/share/tomcat7
+sudo -H -u tomcat7 CATALINA_BASE=/var/lib/tomcat7 /usr/share/tomcat7/bin/catalina.sh run
